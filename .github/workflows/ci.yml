@@ -1,0 +1,49 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: ${{ matrix.os }} / py${{ matrix.python }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        python: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v4
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Install (locked)
+        run: uv sync --locked --extra dev --python ${{ matrix.python }}
+
+      - name: Lint (ruff)
+        run: uv run ruff check src tests scripts
+
+      - name: Format check (ruff)
+        run: uv run ruff format --check src
+
+      - name: Types (pyright, library code only)
+        run: uv run pyright
+
+      - name: Tests
+        run: uv run pytest -q
+
+      # The MVP contract: every §20 criterion has executable evidence.
+      - name: MVP audit (DEVELOPMENT.md 20)
+        run: uv run python scripts/verify_mvp.py --skip-tests

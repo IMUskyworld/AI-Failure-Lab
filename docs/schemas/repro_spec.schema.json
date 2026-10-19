@@ -1,0 +1,54 @@
+{
+  "properties": {
+    "command": {
+      "title": "Command",
+      "type": "string"
+    },
+    "cwd": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cwd"
+    },
+    "expect_exit_nonzero": {
+      "default": true,
+      "title": "Expect Exit Nonzero",
+      "type": "boolean"
+    },
+    "pattern": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pattern"
+    },
+    "timeout_s": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Timeout S"
+    }
+  },
+  "required": [
+    "command"
+  ],
+  "title": "ReproSpec",
+  "type": "object"
+}

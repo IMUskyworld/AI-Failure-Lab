@@ -1,0 +1,69 @@
+{
+  "$defs": {
+    "Severity": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Severity",
+      "type": "string"
+    },
+    "TaxonomySignature": {
+      "properties": {
+        "field": {
+          "title": "Field",
+          "type": "string"
+        },
+        "pattern": {
+          "title": "Pattern",
+          "type": "string"
+        }
+      },
+      "required": [
+        "field",
+        "pattern"
+      ],
+      "title": "TaxonomySignature",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "description": {
+      "default": "",
+      "title": "Description",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "label": {
+      "title": "Label",
+      "type": "string"
+    },
+    "recovery_template": {
+      "default": "",
+      "title": "Recovery Template",
+      "type": "string"
+    },
+    "severity": {
+      "$ref": "#/$defs/Severity",
+      "default": "medium"
+    },
+    "signatures": {
+      "items": {
+        "$ref": "#/$defs/TaxonomySignature"
+      },
+      "title": "Signatures",
+      "type": "array"
+    }
+  },
+  "required": [
+    "id",
+    "label"
+  ],
+  "title": "TaxonomyCategory",
+  "type": "object"
+}

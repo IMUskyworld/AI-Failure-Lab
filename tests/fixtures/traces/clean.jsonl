@@ -1,0 +1,4 @@
+{"kind": "task", "task": "Fix README typo", "model": "claude-sonnet-4.5", "harness": "claude-code"}
+{"kind": "tool_call", "name": "Edit", "arguments": {"file": "README.md"}}
+{"kind": "tool_result", "result": "applied"}
+{"kind": "final", "result": "done", "ok": true}

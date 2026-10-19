@@ -1,0 +1,31 @@
+{
+  "meta": {
+    "description": "失败检测规则（DEVELOPMENT.md §9.3）。任一规则命中 → 该 trace 计为失败并生成事故记录；命中的规则写入证据。",
+    "reviewed_on": "2026-09-22"
+  },
+  "rules": [
+    {
+      "id": "error_present",
+      "when": "error",
+      "detail": "trace 记录了 error"
+    },
+    {
+      "id": "final_failed",
+      "when": "final_result",
+      "pattern": "(?i)fail|error|abort|无法|失败|not implemented|未完成",
+      "detail": "最终结果为失败态"
+    },
+    {
+      "id": "retry_storm",
+      "when": "retries",
+      "min": 3,
+      "detail": "重试次数达到阈值（≥3）"
+    },
+    {
+      "id": "tool_errors",
+      "when": "tool_call_errors",
+      "min": 1,
+      "detail": "存在工具调用错误"
+    }
+  ]
+}

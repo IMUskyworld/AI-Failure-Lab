@@ -1,0 +1,263 @@
+{
+  "$defs": {
+    "CategoryCount": {
+      "properties": {
+        "category": {
+          "title": "Category",
+          "type": "string"
+        },
+        "count": {
+          "title": "Count",
+          "type": "integer"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        }
+      },
+      "required": [
+        "category",
+        "label",
+        "count"
+      ],
+      "title": "CategoryCount",
+      "type": "object"
+    },
+    "IncidentBrief": {
+      "properties": {
+        "category": {
+          "title": "Category",
+          "type": "string"
+        },
+        "category_label": {
+          "title": "Category Label",
+          "type": "string"
+        },
+        "harness": {
+          "title": "Harness",
+          "type": "string"
+        },
+        "model": {
+          "title": "Model",
+          "type": "string"
+        },
+        "occurrences": {
+          "title": "Occurrences",
+          "type": "integer"
+        },
+        "public_id": {
+          "title": "Public Id",
+          "type": "string"
+        },
+        "repro_status": {
+          "$ref": "#/$defs/ReproStatus"
+        },
+        "status": {
+          "$ref": "#/$defs/IncidentStatus"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "public_id",
+        "title",
+        "category",
+        "category_label",
+        "status",
+        "repro_status",
+        "model",
+        "harness",
+        "occurrences"
+      ],
+      "title": "IncidentBrief",
+      "type": "object"
+    },
+    "IncidentStatus": {
+      "enum": [
+        "open",
+        "reproduced",
+        "fixed",
+        "wontfix"
+      ],
+      "title": "IncidentStatus",
+      "type": "string"
+    },
+    "KeyCount": {
+      "properties": {
+        "count": {
+          "title": "Count",
+          "type": "integer"
+        },
+        "key": {
+          "title": "Key",
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "count"
+      ],
+      "title": "KeyCount",
+      "type": "object"
+    },
+    "ReportTotals": {
+      "properties": {
+        "fixed": {
+          "default": 0,
+          "title": "Fixed",
+          "type": "integer"
+        },
+        "incidents": {
+          "default": 0,
+          "title": "Incidents",
+          "type": "integer"
+        },
+        "open": {
+          "default": 0,
+          "title": "Open",
+          "type": "integer"
+        },
+        "repro_rate": {
+          "default": 0.0,
+          "title": "Repro Rate",
+          "type": "number"
+        },
+        "reproduced": {
+          "default": 0,
+          "title": "Reproduced",
+          "type": "integer"
+        },
+        "unverified": {
+          "default": 0,
+          "title": "Unverified",
+          "type": "integer"
+        },
+        "wontfix": {
+          "default": 0,
+          "title": "Wontfix",
+          "type": "integer"
+        }
+      },
+      "title": "ReportTotals",
+      "type": "object"
+    },
+    "ReproStatus": {
+      "enum": [
+        "unverified",
+        "reproduced",
+        "fixed",
+        "inconclusive",
+        "interrupted"
+      ],
+      "title": "ReproStatus",
+      "type": "string"
+    },
+    "ToolInfo": {
+      "properties": {
+        "name": {
+          "default": "faillab",
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "version"
+      ],
+      "title": "ToolInfo",
+      "type": "object"
+    },
+    "TopSignature": {
+      "properties": {
+        "occurrences": {
+          "title": "Occurrences",
+          "type": "integer"
+        },
+        "public_id": {
+          "title": "Public Id",
+          "type": "string"
+        },
+        "signature": {
+          "title": "Signature",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        }
+      },
+      "required": [
+        "signature",
+        "title",
+        "public_id",
+        "occurrences"
+      ],
+      "title": "TopSignature",
+      "type": "object"
+    }
+  },
+  "properties": {
+    "by_category": {
+      "items": {
+        "$ref": "#/$defs/CategoryCount"
+      },
+      "title": "By Category",
+      "type": "array"
+    },
+    "by_harness": {
+      "items": {
+        "$ref": "#/$defs/KeyCount"
+      },
+      "title": "By Harness",
+      "type": "array"
+    },
+    "by_model": {
+      "items": {
+        "$ref": "#/$defs/KeyCount"
+      },
+      "title": "By Model",
+      "type": "array"
+    },
+    "generated_at": {
+      "title": "Generated At",
+      "type": "string"
+    },
+    "recent": {
+      "items": {
+        "$ref": "#/$defs/IncidentBrief"
+      },
+      "title": "Recent",
+      "type": "array"
+    },
+    "schema_version": {
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "tool": {
+      "$ref": "#/$defs/ToolInfo"
+    },
+    "top_signatures": {
+      "items": {
+        "$ref": "#/$defs/TopSignature"
+      },
+      "title": "Top Signatures",
+      "type": "array"
+    },
+    "totals": {
+      "$ref": "#/$defs/ReportTotals"
+    }
+  },
+  "required": [
+    "tool",
+    "generated_at",
+    "totals"
+  ],
+  "title": "Report",
+  "type": "object"
+}

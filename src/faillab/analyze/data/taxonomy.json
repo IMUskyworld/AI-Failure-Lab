@@ -1,0 +1,117 @@
+{
+  "meta": {
+    "description": "失败分类法（DEVELOPMENT.md §10）。顺序敏感：具体类别在前，匹配采用首个命中；无命中 → unclassified。signature.field ∈ {error, final, tool_error, task, retries}；field=retries 时 pattern 为数字阈值。",
+    "reviewed_on": "2026-09-22"
+  },
+  "categories": [
+    {
+      "id": "retry_loop",
+      "label": "重试风暴",
+      "description": "agent 在同一个动作上反复重试，没有收敛",
+      "severity": "high",
+      "recovery_template": "为 agent 设置重试上限；定位重复失败的同一动作并更换策略（换工具/换参数/先搜索再编辑）；在提示中补充更明确的验收标准。",
+      "signatures": [{ "field": "retries", "pattern": "3" }]
+    },
+    {
+      "id": "hallucinated_api",
+      "label": "幻觉 API/符号",
+      "description": "引用了不存在的模块、函数或属性",
+      "severity": "high",
+      "recovery_template": "要求 agent 先读源码/文档再写代码；在项目里固化 API 清单（如 __init__ 导出）；保留类型检查（pyright/mypy）作为门禁。",
+      "signatures": [
+        { "field": "error", "pattern": "(?i)ModuleNotFoundError|ImportError|has no attribute|AttributeError|NameError|is not defined|Cannot find module|undefined symbol" },
+        { "field": "tool_error", "pattern": "(?i)ModuleNotFoundError|has no attribute|NameError|Cannot find module" }
+      ]
+    },
+    {
+      "id": "tool_misuse",
+      "label": "工具参数误用",
+      "description": "工具调用的参数缺失/非法，属于调用契约错误",
+      "severity": "medium",
+      "recovery_template": "让 agent 先读工具 schema（或示例调用）再调用；对高频工具在提示中给出最小参数示例；开启参数校验。",
+      "signatures": [
+        { "field": "error", "pattern": "(?i)invalid argument|unexpected keyword|missing required|missing '(old|new)_|usage: |invalid option" },
+        { "field": "tool_error", "pattern": "(?i)invalid argument|unexpected keyword|missing required|usage: |invalid option" }
+      ]
+    },
+    {
+      "id": "env_permission",
+      "label": "环境/权限问题",
+      "description": "命令不存在、权限不足、环境缺失",
+      "severity": "medium",
+      "recovery_template": "先跑环境体检（envdoctor）；确认命令在 PATH 中、依赖已安装、权限足够；把环境准备写成脚本纳入仓库。",
+      "signatures": [
+        { "field": "error", "pattern": "(?i)Permission denied|EACCES|access is denied|command not found|not recognized as an internal|No such file or directory|不是内部或外部命令" },
+        { "field": "tool_error", "pattern": "(?i)Permission denied|EACCES|access is denied|command not found|not recognized as an internal|不是内部或外部命令" },
+        { "field": "error", "pattern": "(?i)UnauthorizedAccess|SecurityError|禁止运行脚本|Execution Policy|execution_policies" },
+        { "field": "error", "pattern": "(?i)NotADirectoryError|WinError \\d+" }
+      ]
+    },
+    {
+      "id": "encoding_locale",
+      "label": "编码与语言环境",
+      "description": "跨进程/跨文件的编码假设失效（UTF-8 与 cp936/GBK 混用）",
+      "severity": "medium",
+      "recovery_template": "跨进程输出按 UTF-8 → GBK → replace 三级解码；CLI 入口统一 reconfigure(encoding=\"utf-8\")；对重定向输出加严格解码回归测试。",
+      "signatures": [
+        { "field": "error", "pattern": "(?i)UnicodeDecodeError|UnicodeEncodeError|codec can't (decode|encode)|gbk|cp936" },
+        { "field": "tool_error", "pattern": "(?i)UnicodeDecodeError|UnicodeEncodeError|codec can't (decode|encode)" }
+      ]
+    },
+    {
+      "id": "wrong_file_edit",
+      "label": "改错文件/位置",
+      "description": "编辑目标定位失败或落到了错误位置",
+      "severity": "high",
+      "recovery_template": "编辑前先搜索定位（grep 目标字符串再改）；对关键文件先读后写；编辑失败时要求 agent 重新定位而不是换目标重试。",
+      "signatures": [
+        { "field": "error", "pattern": "(?i)string not found|old_text|old_string|no such file|does not exist|did not apply|not found in" },
+        { "field": "tool_error", "pattern": "(?i)string not found|old_text|old_string|no such file|did not apply|not found in" }
+      ]
+    },
+    {
+      "id": "context_misidentification",
+      "label": "上下文误判",
+      "description": "把目标定位到了语义相近但错误的位置/文件",
+      "severity": "high",
+      "recovery_template": "提供更精确的文件/符号线索（路径、类名、行号）；要求 agent 在编辑前后各贴一次上下文片段核对；对同名文件/函数加注释区分。",
+      "signatures": [
+        { "field": "error", "pattern": "(?i)expected .* found|does not match|wrong file|ambiguous|multiple matches|matched multiple" },
+        { "field": "tool_error", "pattern": "(?i)expected .* found|does not match|wrong file|ambiguous|multiple matches" }
+      ]
+    },
+    {
+      "id": "test_failure_ignored",
+      "label": "测试失败未处理",
+      "description": "测试已失败但没有被处理（或未被发现）",
+      "severity": "high",
+      "recovery_template": "把测试运行写进 agent 的验收步骤；禁止跳过/注释测试来「通过」；CI 门禁必须包含对应测试。",
+      "signatures": [
+        { "field": "tool_error", "pattern": "(?i)(tests?|pytest).{0,40}(fail|failed|failing)" },
+        { "field": "final", "pattern": "(?i)tests?\\s+(fail|failed|failing)" }
+      ]
+    },
+    {
+      "id": "premature_completion",
+      "label": "过早宣布完成",
+      "description": "给出「完成」结论，但仍有未解决错误",
+      "severity": "high",
+      "recovery_template": "要求 agent 在宣布完成前附上「验证证据」（测试输出/命令结果）；用独立的验收步骤复核，不接受纯文字结论。",
+      "signatures": [
+        { "field": "final", "pattern": "(?i)(?:^|\\[failed\\].*)(done|implemented|completed|完成|已实现)" }
+      ]
+    },
+    {
+      "id": "regression_introduced",
+      "label": "引入回归",
+      "description": "修改破坏了既有功能或测试",
+      "severity": "critical",
+      "recovery_template": "改前先跑基线测试；要求 agent 对既有测试做全量回归；引入变更后对比测试通过率。",
+      "signatures": [
+        { "field": "error", "pattern": "(?i)existing tests? failed|previously (passing|working)|regression|broke (the|existing)" },
+        { "field": "tool_error", "pattern": "(?i)existing tests? failed|regression|broke (the|existing)" },
+        { "field": "final", "pattern": "(?i)regression" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,328 @@
+{
+  "$defs": {
+    "Backend": {
+      "enum": [
+        "llm",
+        "offline"
+      ],
+      "title": "Backend",
+      "type": "string"
+    },
+    "Confidence": {
+      "enum": [
+        "high",
+        "medium",
+        "low"
+      ],
+      "title": "Confidence",
+      "type": "string"
+    },
+    "Evidence": {
+      "properties": {
+        "detail": {
+          "title": "Detail",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "detail"
+      ],
+      "title": "Evidence",
+      "type": "object"
+    },
+    "IncidentStatus": {
+      "enum": [
+        "open",
+        "reproduced",
+        "fixed",
+        "wontfix"
+      ],
+      "title": "IncidentStatus",
+      "type": "string"
+    },
+    "ReproSpec": {
+      "properties": {
+        "command": {
+          "title": "Command",
+          "type": "string"
+        },
+        "cwd": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cwd"
+        },
+        "expect_exit_nonzero": {
+          "default": true,
+          "title": "Expect Exit Nonzero",
+          "type": "boolean"
+        },
+        "pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pattern"
+        },
+        "timeout_s": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timeout S"
+        }
+      },
+      "required": [
+        "command"
+      ],
+      "title": "ReproSpec",
+      "type": "object"
+    },
+    "ReproStatus": {
+      "enum": [
+        "unverified",
+        "reproduced",
+        "fixed",
+        "inconclusive",
+        "interrupted"
+      ],
+      "title": "ReproStatus",
+      "type": "string"
+    },
+    "Reproduction": {
+      "properties": {
+        "fixed_count": {
+          "default": 0,
+          "title": "Fixed Count",
+          "type": "integer"
+        },
+        "inconclusive_count": {
+          "default": 0,
+          "title": "Inconclusive Count",
+          "type": "integer"
+        },
+        "last_run_at": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Last Run At"
+        },
+        "reproduced_count": {
+          "default": 0,
+          "title": "Reproduced Count",
+          "type": "integer"
+        },
+        "status": {
+          "$ref": "#/$defs/ReproStatus",
+          "default": "unverified"
+        },
+        "total_runs": {
+          "default": 0,
+          "title": "Total Runs",
+          "type": "integer"
+        }
+      },
+      "title": "Reproduction",
+      "type": "object"
+    },
+    "Severity": {
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "critical"
+      ],
+      "title": "Severity",
+      "type": "string"
+    }
+  },
+  "description": "Failure record (DEVELOPMENT.md §8.2).",
+  "properties": {
+    "analyzed_by": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Backend"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "category": {
+      "default": "unclassified",
+      "title": "Category",
+      "type": "string"
+    },
+    "category_label": {
+      "default": "未分类",
+      "title": "Category Label",
+      "type": "string"
+    },
+    "confidence": {
+      "$ref": "#/$defs/Confidence",
+      "default": "low"
+    },
+    "created_at": {
+      "title": "Created At",
+      "type": "string"
+    },
+    "duplicate_of": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Duplicate Of"
+    },
+    "evidence": {
+      "items": {
+        "$ref": "#/$defs/Evidence"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "failure": {
+      "default": "",
+      "title": "Failure",
+      "type": "string"
+    },
+    "fallback_reason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Fallback Reason"
+    },
+    "harness": {
+      "default": "unknown",
+      "title": "Harness",
+      "type": "string"
+    },
+    "model": {
+      "default": "unknown",
+      "title": "Model",
+      "type": "string"
+    },
+    "occurrences": {
+      "default": 1,
+      "title": "Occurrences",
+      "type": "integer"
+    },
+    "public_id": {
+      "title": "Public Id",
+      "type": "string"
+    },
+    "reason": {
+      "default": "",
+      "title": "Reason",
+      "type": "string"
+    },
+    "recovery": {
+      "default": "",
+      "title": "Recovery",
+      "type": "string"
+    },
+    "reproduce": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ReproSpec"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "reproduction": {
+      "$ref": "#/$defs/Reproduction"
+    },
+    "severity": {
+      "$ref": "#/$defs/Severity",
+      "default": "medium"
+    },
+    "signature": {
+      "default": "",
+      "title": "Signature",
+      "type": "string"
+    },
+    "slug": {
+      "title": "Slug",
+      "type": "string"
+    },
+    "source": {
+      "default": "import",
+      "title": "Source",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/IncidentStatus",
+      "default": "open"
+    },
+    "task": {
+      "default": "",
+      "title": "Task",
+      "type": "string"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    },
+    "traces": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Traces",
+      "type": "array"
+    },
+    "updated_at": {
+      "title": "Updated At",
+      "type": "string"
+    }
+  },
+  "required": [
+    "public_id",
+    "slug",
+    "title",
+    "created_at",
+    "updated_at"
+  ],
+  "title": "Incident",
+  "type": "object"
+}

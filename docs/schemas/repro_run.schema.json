@@ -1,0 +1,98 @@
+{
+  "$defs": {
+    "ReproStatus": {
+      "enum": [
+        "unverified",
+        "reproduced",
+        "fixed",
+        "inconclusive",
+        "interrupted"
+      ],
+      "title": "ReproStatus",
+      "type": "string"
+    }
+  },
+  "properties": {
+    "duration_s": {
+      "title": "Duration S",
+      "type": "number"
+    },
+    "ended_at": {
+      "title": "Ended At",
+      "type": "string"
+    },
+    "exit_code": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Exit Code"
+    },
+    "exit_nonzero_matched": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Exit Nonzero Matched"
+    },
+    "incident_id": {
+      "title": "Incident Id",
+      "type": "string"
+    },
+    "log_path": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Log Path"
+    },
+    "note": {
+      "default": "",
+      "title": "Note",
+      "type": "string"
+    },
+    "pattern_matched": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pattern Matched"
+    },
+    "started_at": {
+      "title": "Started At",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/ReproStatus"
+    }
+  },
+  "required": [
+    "incident_id",
+    "started_at",
+    "ended_at",
+    "duration_s",
+    "status"
+  ],
+  "title": "ReproRun",
+  "type": "object"
+}

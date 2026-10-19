@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>faillab 仪表盘</title>
+<style>
+  :root { --bg:#0f1115; --card:#171a21; --border:#2a2f3a; --text:#e6e8ee; --dim:#9aa3b2;
+          --ok:#3fb950; --warn:#d29922; --bad:#f85149; --accent:#58a6ff; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.6 "Segoe UI","Microsoft YaHei",system-ui,sans-serif; }
+  main { max-width: 980px; margin: 0 auto; padding: 32px 20px 64px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 30px 0 12px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+  .meta { color: var(--dim); font-size: 13px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 18px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; }
+  .card .num { font-size: 24px; font-weight: 700; }
+  .card .lbl { color: var(--dim); font-size: 13px; }
+  .card.ok .num { color: var(--ok); } .card.bad .num { color: var(--bad); } .card.warn .num { color: var(--warn); }
+  .chart { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 10px; margin: 12px 0; }
+  svg { display: block; width: 100%; height: auto; }
+  .chart-bar { fill: var(--accent); }
+  .chart-label { fill: var(--dim); font-size: 12px; }
+  .chart-title { fill: var(--text); font-size: 13px; font-weight: 600; }
+  table { width: 100%; border-collapse: collapse; background: var(--card); border: 1px solid var(--border);
+          border-radius: 10px; overflow: hidden; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--dim); font-weight: 600; font-size: 13px; }
+  tr:last-child td { border-bottom: none; }
+  .st-open { color: var(--warn); } .st-reproduced { color: var(--bad); } .st-fixed { color: var(--ok); } .st-wontfix { color: var(--dim); }
+  .rp-reproduced { color: var(--bad); } .rp-fixed { color: var(--ok); } .rp-unverified { color: var(--dim); } .rp-inconclusive, .rp-interrupted { color: var(--warn); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  footer { margin-top: 40px; color: var(--dim); font-size: 12px; }
+  @media (max-width: 720px) { .grid2 { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>faillab 仪表盘</h1>
+  <div class="meta">工具 {{ report.tool.name }} v{{ report.tool.version }} · 生成于 {{ report.generated_at }}</div>
+
+  <div class="cards">
+    <div class="card"><div class="num">{{ report.totals.incidents }}</div><div class="lbl">事故总数</div></div>
+    <div class="card bad"><div class="num">{{ report.totals.reproduced }}</div><div class="lbl">仍可复现</div></div>
+    <div class="card ok"><div class="num">{{ report.totals.fixed }}</div><div class="lbl">已修复</div></div>
+    <div class="card warn"><div class="num">{{ report.totals.open }}</div><div class="lbl">未解决</div></div>
+    <div class="card"><div class="num">{{ report.totals.unverified }}</div><div class="lbl">未验证</div></div>
+    <div class="card"><div class="num">{{ "%.0f%%"|format(report.totals.repro_rate * 100) }}</div><div class="lbl">复现率（已尝试中仍可复现）</div></div>
+  </div>
+
+  <h2>分布</h2>
+  <div class="grid2">
+    <div class="chart">{{ charts.by_category | safe }}</div>
+    <div class="chart">{{ charts.by_model | safe }}</div>
+  </div>
+  <div class="chart">{{ charts.by_harness | safe }}</div>
+
+  <h2>Top signatures（按出现次数）</h2>
+  <table>
+    <tr><th>ID</th><th>标题</th><th>签名</th><th>出现次数</th></tr>
+    {% for item in report.top_signatures %}
+    <tr><td>{{ item.public_id }}</td><td>{{ item.title }}</td><td class="meta">{{ item.signature }}</td><td>{{ item.occurrences }}</td></tr>
+    {% else %}
+    <tr><td colspan="4" class="meta">（还没有事故记录）</td></tr>
+    {% endfor %}
+  </table>
+
+  <h2>最近事故</h2>
+  <table>
+    <tr><th>ID</th><th>标题</th><th>类别</th><th>状态</th><th>复现</th><th>模型 / Harness</th></tr>
+    {% for item in report.recent %}
+    <tr>
+      <td>{{ item.public_id }}</td>
+      <td>{{ item.title }}</td>
+      <td>{{ item.category_label }}</td>
+      <td class="st-{{ item.status.value }}">{{ item.status.value }}</td>
+      <td class="rp-{{ item.repro_status.value }}">{{ item.repro_status.value }}</td>
+      <td class="meta">{{ item.model }} / {{ item.harness }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6" class="meta">（还没有事故记录）</td></tr>
+    {% endfor %}
+  </table>
+
+  <footer>
+    faillab 只处理本地数据（无遥测）；复现判定基于真实退出码与输出正则，不依赖任何模型。
+  </footer>
+</main>
+</body>
+</html>
